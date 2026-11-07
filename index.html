@@ -47,6 +47,10 @@
   .search input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
 
   .sec-title{font-size:13px;color:var(--sub);font-weight:700;margin:18px 2px 8px;letter-spacing:.3px;}
+  .sec-head{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;cursor:pointer;font-size:15px;font-weight:700;color:var(--ink);}
+  .sec-head .sh-label{flex:1;}
+  .sec-head .sh-count{font-size:12px;color:var(--sub);font-weight:600;background:var(--bg);border-radius:999px;padding:2px 9px;}
+  .sec-head .sh-chev{color:var(--sub);font-size:13px;}
 
   /* 聚类列表 */
   .cluster{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:13px 15px;margin-bottom:10px;cursor:pointer;box-shadow:var(--shadow);transition:.12s;color:var(--ink);}
@@ -88,6 +92,7 @@
   .btn{flex:1;border:none;border-radius:14px;padding:15px;font-size:16px;font-weight:700;cursor:pointer;transition:.12s;}
   .btn.no{background:var(--bad-soft);color:var(--bad);}
   .btn.yes{background:var(--good-soft);color:var(--good);}
+  .btn.prev{flex:0 0 auto;padding:15px 16px;background:var(--card);border:1px solid var(--line);color:var(--sub);font-weight:600;}
   .btn:active{transform:scale(.97);}
   .kbd{font-size:11px;opacity:.6;font-weight:500;margin-left:4px;}
 
@@ -132,6 +137,7 @@
     <div class="bar"><i id="s-bar"></i></div>
     <div class="card" id="card"></div>
     <div class="actions">
+      <button class="btn prev" id="btn-prev">上一词<span class="kbd">↑</span></button>
       <button class="btn no" id="btn-no">不认识 ✗<span class="kbd">←</span></button>
       <button class="btn yes" id="btn-yes">认识 ✓<span class="kbd">→</span></button>
     </div>
@@ -148,6 +154,10 @@ const SECT = [['root','词根词缀'],['syn','近义辨析'],['ph','短语动词
 
 let P = (()=>{ try{ const o=JSON.parse(localStorage.getItem(LS)||'{"k":[],"w":[]}'); return {k:new Set(o.k||[]), w:new Set(o.w||[])}; }catch(e){ return {k:new Set(), w:new Set()}; } })();
 function save(){ localStorage.setItem(LS, JSON.stringify({k:[...P.k], w:[...P.w]})); }
+
+const LS_UI = 'beici_v1_ui';
+let openSec = (()=>{ try{ return new Set(JSON.parse(localStorage.getItem(LS_UI)||'{"open":[]}').open||[]); }catch(e){ return new Set(); } })();
+function saveOpen(){ localStorage.setItem(LS_UI, JSON.stringify({open:[...openSec]})); }
 
 const TOTAL = DATA.reduce((n,c)=>n+c.w.length,0);
 const allWords = new Set(DATA.flatMap(c=>c.w.map(x=>x.w)));
@@ -184,13 +194,21 @@ function renderList(){
   if(!list.length){ el.innerHTML='<div class="empty">没有找到相关内容</div>'; return; }
 
   const groups = (curSec==='all'||curSec==='weak') ? SECT : [[curSec, SECT.find(s=>s[0]===curSec)?.[1]||'']];
+  const accordion = (curSec==='all') && !qv;
   for(const [sk,slabel] of groups){
     const gs = list.filter(c=>c.s===sk);
     if(!gs.length) continue;
-    if(curSec==='all'||curSec==='weak'){
+    if(accordion){
+      const open = openSec.has(sk);
+      const h=document.createElement('button'); h.className='sec-head';
+      h.innerHTML=`<span class="sh-label">${slabel}</span><span class="sh-count">${gs.length} 组</span><span class="sh-chev">${open?'▾':'▸'}</span>`;
+      h.onclick=()=>{ open? openSec.delete(sk) : openSec.add(sk); saveOpen(); renderList(); };
+      el.appendChild(h);
+      if(open) gs.forEach(c=> el.appendChild(clusterEl(c)));
+    } else {
       const h=document.createElement('div'); h.className='sec-title'; h.textContent=slabel; el.appendChild(h);
+      gs.forEach(c=> el.appendChild(clusterEl(c)));
     }
-    gs.forEach(c=> el.appendChild(clusterEl(c)));
   }
 }
 function clusterEl(c){
@@ -230,14 +248,14 @@ function renderStats(){
 let study=null; // {title,note,key,deck:[{w,m}],di,flipped,weakOnly}
 function openCluster(key){
   const c=DATA.find(x=>x.k===key); if(!c)return;
-  study={title:c.t,note:c.n,key:c.k,deck:c.w.map(x=>({w:x.w,m:x.m})),di:0,flipped:false,weakOnly:false};
+  study={title:c.t,note:c.n,key:c.k,deck:c.w.map(x=>({w:x.w,m:x.m})),di:0,flipped:false,weakOnly:false,undo:[]};
   document.getElementById('weak-only').checked=false;
   showStudy();
 }
 function openWeak(){
   const deck=[]; DATA.forEach(c=>c.w.forEach(x=>{ if(P.w.has(x.w)) deck.push({w:x.w,m:x.m}); }));
   shuffle(deck);
-  study={title:'不会的词 · 复习',note:'这里只有你标过「不认识」的词，认识一个就少一个，直到清零。',key:null,deck,di:0,flipped:false,weakOnly:false};
+  study={title:'不会的词 · 复习',note:'这里只有你标过「不认识」的词，认识一个就少一个，直到清零。',key:null,deck,di:0,flipped:false,weakOnly:false,undo:[]};
   document.getElementById('weak-only').checked=false;
   showStudy();
 }
@@ -257,7 +275,7 @@ function rebuildDeck(){
   } else {
     if(study.key){ const c=DATA.find(x=>x.k===study.key); study.deck=c.w.map(x=>({w:x.w,m:x.m})); }
   }
-  study.di=0; study.flipped=false;
+  study.di=0; study.flipped=false; study.undo=[];
   if(!study.deck.length){ renderEmpty(); return; }
   document.getElementById('s-done').style.display='none';
   document.querySelector('.actions').style.display='flex';
@@ -282,10 +300,26 @@ function renderCard(){
 function mark(know){
   if(!study || !study.deck.length) return;
   const w=study.deck[study.di].w;
+  study.undo.push({w, was:statusOf(w)});
   if(know){ P.k.add(w); P.w.delete(w); } else { P.w.add(w); P.k.delete(w); }
   save();
   study.di++; study.flipped=false;
   if(study.di>=study.deck.length){ renderDone(); } else renderCard();
+}
+function prev(){
+  if(!study || study.di<=0) return;
+  const last = study.undo.pop();
+  if(last){
+    P.k.delete(last.w); P.w.delete(last.w);
+    if(last.was==='k') P.k.add(last.w);
+    else if(last.was==='w') P.w.add(last.w);
+    save();
+  }
+  study.di--; study.flipped=false;
+  document.getElementById('s-done').style.display='none';
+  document.querySelector('.actions').style.display='flex';
+  document.getElementById('card').style.display='flex';
+  renderCard();
 }
 function renderDone(){
   const s=stats();
@@ -319,12 +353,14 @@ function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.rand
 document.getElementById('s-back').onclick=goHome;
 document.getElementById('btn-no').onclick=()=>mark(false);
 document.getElementById('btn-yes').onclick=()=>mark(true);
+document.getElementById('btn-prev').onclick=prev;
 document.getElementById('weak-only').onchange=e=>{ study.weakOnly=e.target.checked; rebuildDeck(); };
 document.getElementById('q').oninput=e=>{ q=e.target.value; renderList(); };
 document.getElementById('reset').onclick=()=>{ if(confirm('确定清除全部进度？')){ P={k:new Set(),w:new Set()}; save(); renderStats(); renderTabs(); renderList(); } };
 document.addEventListener('keydown',e=>{
   if(!document.getElementById('study').classList.contains('show')) return;
   if(e.key===' '||e.key==='ArrowDown'){ e.preventDefault(); if(study){study.flipped=!study.flipped; if(study.flipped) speak(study.deck[study.di].w); renderCard();} }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); prev(); }
   else if(e.key==='ArrowLeft'||e.key==='1'){ mark(false); }
   else if(e.key==='ArrowRight'||e.key==='2'){ mark(true); }
 });
