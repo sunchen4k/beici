@@ -6,94 +6,125 @@
 <title>背背背😡 · 英语生词聚类卡</title>
 <style>
   :root{
-    --bg:#f5f6fa; --card:#ffffff; --ink:#1b1f3b; --sub:#7a8194;
-    --accent:#4f46e5; --accent-soft:#eef1ff;
+    --bg:#f6f6fb; --card:#ffffff; --ink:#171a2c; --sub:#8a90a6;
+    --accent:#5b5bd6; --accent2:#8b5cf6; --accent-soft:#eef0ff;
     --good:#16a34a; --good-soft:#e9f9ef;
-    --bad:#dc2626; --bad-soft:#fdeeee;
-    --warn:#b45309; --warn-soft:#fdf3e7;
-    --line:#e7e9f0; --radius:16px;
-    --shadow:0 1px 2px rgba(20,24,60,.04), 0 8px 24px rgba(20,24,60,.06);
+    --bad:#e11d48; --bad-soft:#fef1f5;
+    --warn:#d97706; --warn-soft:#fef6e8;
+    --line:#e8e9f3; --line2:#dfe1ee; --radius:18px;
+    --shadow-sm:0 1px 2px rgba(23,26,44,.05);
+    --shadow:0 1px 2px rgba(23,26,44,.04),0 12px 32px -14px rgba(23,26,44,.16);
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;}
   body{
     font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
     background:var(--bg); color:var(--ink); line-height:1.55;
-    -webkit-font-smoothing:antialiased;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
   }
+  body::before{content:'';position:fixed;top:-140px;left:50%;transform:translateX(-50%);width:640px;height:320px;background:radial-gradient(closest-side,rgba(99,102,241,.13),transparent);z-index:-1;pointer-events:none;}
   .wrap{max-width:680px;margin:0 auto;padding:0 14px 40px;}
 
   /* 顶部 */
-  header{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,var(--bg) 82%,rgba(245,246,250,0));padding:14px 0 10px;}
-  .brand{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
-  .brand h1{font-size:22px;margin:0;font-weight:800;letter-spacing:-.5px;}
-  .brand .sub{color:var(--sub);font-size:13px;}
-  .stats{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
-  .stat{font-size:12.5px;padding:5px 11px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--sub);font-weight:600;}
+  header{position:sticky;top:0;z-index:20;background:rgba(246,246,251,.82);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:12px 0 10px;}
+  .brand-row{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .brand{display:flex;flex-direction:column;min-width:0;}
+  .brand-title{display:flex;align-items:center;gap:7px;}
+  .brand .logo{font-size:20px;line-height:1;}
+  .brand h1{font-size:22px;margin:0;font-weight:800;letter-spacing:-.5px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .brand .sub{color:var(--sub);font-size:12.5px;margin-top:1px;}
+  .seg{flex:0 0 auto;display:flex;background:#e9ebf6;border-radius:12px;padding:3px;gap:2px;}
+  .seg-btn{border:none;background:transparent;border-radius:9px;padding:7px 15px;font-size:14px;font-weight:600;color:var(--sub);cursor:pointer;transition:all .2s ease;}
+  .seg-btn.on{background:#fff;color:var(--accent);box-shadow:0 1px 5px rgba(23,26,44,.10);}
+
+  .stats{display:flex;gap:8px;margin-top:11px;flex-wrap:wrap;}
+  .stat{font-size:12.5px;padding:5px 12px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--sub);font-weight:600;}
   .stat b{color:var(--ink);font-weight:800;margin-left:2px;}
   .stat.good{background:var(--good-soft);border-color:transparent;color:var(--good);}
   .stat.bad{background:var(--bad-soft);border-color:transparent;color:var(--bad);}
   .stat.new{background:var(--warn-soft);border-color:transparent;color:var(--warn);}
+  .pbar{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:11px;}
+  .pbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px;transition:width .5s cubic-bezier(.2,.7,.2,1);}
 
   /* 分区 chips */
-  .tabs{display:flex;gap:8px;overflow-x:auto;padding:10px 0 4px;margin:0 -14px;padding-left:14px;padding-right:14px;scrollbar-width:none;}
+  .tabs{display:flex;gap:8px;overflow-x:auto;padding:10px 0 2px;margin:0 -14px;padding-left:14px;padding-right:14px;scrollbar-width:none;}
   .tabs::-webkit-scrollbar{display:none;}
-  .chip{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--sub);font-size:14px;font-weight:600;padding:7px 14px;border-radius:999px;cursor:pointer;white-space:nowrap;transition:.15s;}
-  .chip.on{background:var(--accent);border-color:var(--accent);color:#fff;}
-  .chip.weak.on{background:var(--bad);border-color:var(--bad);color:#fff;}
+  .chip{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--sub);font-size:14px;font-weight:600;padding:7px 15px;border-radius:999px;cursor:pointer;white-space:nowrap;transition:all .18s ease;}
+  .chip.on{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 4px 12px -3px rgba(91,91,214,.5);}
+  .chip.weak.on{background:var(--bad);border-color:var(--bad);box-shadow:0 4px 12px -3px rgba(225,29,72,.4);}
 
-  .search{margin:12px 0 6px;}
-  .search input{width:100%;font-size:15px;padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);outline:none;}
+  .search{margin:12px 0 4px;}
+  .search input{width:100%;font-size:15px;padding:12px 15px;border-radius:13px;border:1px solid var(--line);background:var(--card);color:var(--ink);outline:none;transition:border-color .2s, box-shadow .2s;}
   .search input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
 
   .sec-title{font-size:13px;color:var(--sub);font-weight:700;margin:18px 2px 8px;letter-spacing:.3px;}
-  .sec-head{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;cursor:pointer;font-size:15px;font-weight:700;color:var(--ink);}
+  .sec-head{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 15px;margin-bottom:10px;cursor:pointer;font-size:15px;font-weight:700;color:var(--ink);box-shadow:var(--shadow-sm);transition:transform .12s ease;}
+  .sec-head:active{transform:scale(.985);}
   .sec-head .sh-label{flex:1;}
-  .sec-head .sh-count{font-size:12px;color:var(--sub);font-weight:600;background:var(--bg);border-radius:999px;padding:2px 9px;}
-  .sec-head .sh-chev{color:var(--sub);font-size:13px;}
+  .sec-head .sh-count{font-size:12px;color:var(--sub);font-weight:600;background:var(--bg);border-radius:999px;padding:2px 10px;}
+  .sec-head .sh-chev{color:var(--sub);font-size:13px;transition:transform .2s;}
 
   /* 聚类列表 */
-  .cluster{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:13px 15px;margin-bottom:10px;cursor:pointer;box-shadow:var(--shadow);transition:.12s;color:var(--ink);}
-  .cluster:active{transform:scale(.985);}
+  .cluster{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;cursor:pointer;box-shadow:var(--shadow);transition:transform .15s ease, box-shadow .15s ease;color:var(--ink);animation:rise .3s ease both;}
+  .cluster:active{transform:scale(.98);box-shadow:var(--shadow-sm);}
   .c-top{display:flex;justify-content:space-between;align-items:center;gap:10px;}
   .c-title{font-size:16px;font-weight:700;}
-  .c-count{font-size:12px;color:var(--sub);font-weight:600;background:var(--bg);border-radius:999px;padding:2px 9px;flex:0 0 auto;}
+  .c-count{font-size:12px;color:var(--sub);font-weight:600;background:var(--bg);border-radius:999px;padding:2px 10px;flex:0 0 auto;}
   .c-note{font-size:12.5px;color:var(--sub);margin-top:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
   .c-prog{display:flex;gap:10px;margin-top:9px;font-size:12px;font-weight:600;color:var(--sub);}
   .c-prog .k{color:var(--good);} .c-prog .w{color:var(--bad);} .c-prog .n{color:var(--warn);}
 
-  .empty{text-align:center;color:var(--sub);padding:40px 10px;font-size:14px;}
+  /* 词表 */
+  .wgroup{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:12px 16px;margin-bottom:10px;box-shadow:var(--shadow-sm);animation:rise .28s ease both;}
+  .wg-title{font-size:14.5px;font-weight:700;color:var(--ink);}
+  .wrow{display:flex;align-items:center;gap:9px;padding:9px 0;font-size:15px;}
+  .wrow + .wrow{border-top:1px solid var(--line);}
+  .wdot{width:7px;height:7px;border-radius:50%;flex:0 0 auto;background:#d5d8e6;}
+  .wdot.k{background:var(--good);} .wdot.w{background:var(--bad);}
+  .ww{font-weight:700;color:var(--ink);}
+  .wspk{border:none;background:none;font-size:16px;cursor:pointer;padding:1px 2px;color:var(--accent);opacity:.85;}
+  .wspk:active{transform:scale(1.2);}
+  .wm{flex:1;text-align:right;font-size:13px;color:var(--sub);line-height:1.45;}
+
+  .empty{text-align:center;color:var(--sub);padding:44px 10px;font-size:14px;}
+
+  @keyframes rise{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:none;}}
 
   /* 学习视图 */
   #study{position:fixed;inset:0;background:var(--bg);z-index:30;overflow-y:auto;display:none;}
   #study.show{display:block;}
-  .s-bar{position:sticky;top:0;background:var(--bg);padding:12px 14px 6px;z-index:5;display:flex;align-items:center;gap:10px;}
-  .back{flex:0 0 auto;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:7px 12px;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;}
+  .s-bar{position:sticky;top:0;background:rgba(246,246,251,.82);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:12px 14px 6px;z-index:5;display:flex;align-items:center;gap:10px;}
+  .back{flex:0 0 auto;border:1px solid var(--line);background:var(--card);border-radius:11px;padding:7px 13px;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;}
   .s-title{flex:1;font-size:16px;font-weight:800;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .s-prog{flex:0 0 auto;font-size:13px;color:var(--sub);font-weight:700;}
 
   .s-body{max-width:680px;margin:0 auto;padding:8px 14px 60px;}
-  .note{background:var(--warn-soft);border:1px solid #f3d9b8;color:#7c4a12;border-radius:12px;padding:11px 13px;font-size:13.5px;margin-bottom:14px;}
+  .note{background:var(--warn-soft);border:1px solid #f3d9b8;color:#7c4a12;border-radius:13px;padding:11px 14px;font-size:13.5px;margin-bottom:14px;}
   .note b{color:var(--warn);}
   .bar{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:18px;}
-  .bar i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .2s;}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px;transition:width .25s ease;}
 
-  .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:34px 20px;text-align:center;box-shadow:var(--shadow);cursor:pointer;min-height:230px;display:flex;flex-direction:column;align-items:center;justify-content:center;user-select:none;}
-  .card .w{font-size:30px;font-weight:800;letter-spacing:-.5px;line-height:1.25;word-break:break-word;}
+  .card{position:relative;display:grid;perspective:1200px;background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);cursor:pointer;min-height:240px;}
+  .face{grid-area:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px;backface-visibility:hidden;-webkit-backface-visibility:hidden;transition:transform .55s cubic-bezier(.2,.75,.25,1);}
+  .face.front{transform:rotateY(0deg);}
+  .face.back{transform:rotateY(180deg);}
+  .card.flipped .face.front{transform:rotateY(-180deg);}
+  .card.flipped .face.back{transform:rotateY(0deg);}
+  .card .w{font-size:32px;font-weight:800;letter-spacing:-.5px;line-height:1.25;word-break:break-word;}
   .card .hint{margin-top:18px;font-size:13px;color:var(--sub);}
   .card .w-small{font-size:15px;font-weight:700;color:var(--sub);margin-bottom:14px;word-break:break-word;}
   .card .m{font-size:19px;font-weight:600;color:var(--ink);line-height:1.6;word-break:break-word;text-align:left;}
   .card .tag{font-size:12px;color:var(--sub);margin-bottom:8px;}
-  .card .speak{margin-top:20px;border:1px solid var(--line);background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:8px 18px;font-size:14px;font-weight:700;cursor:pointer;}
-  .card .speak:active{transform:scale(.96);}
+  .card .speak{margin-top:20px;border:1px solid var(--line);background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:8px 18px;font-size:14px;font-weight:700;cursor:pointer;transition:transform .12s;}
+  .card .speak:active{transform:scale(.95);}
   .card .speak.sm{margin:0 0 0 8px;padding:3px 10px;font-size:13px;}
 
-  .actions{display:flex;gap:12px;margin-top:16px;}
-  .btn{flex:1;border:none;border-radius:14px;padding:15px;font-size:16px;font-weight:700;cursor:pointer;transition:.12s;}
+  .actions{display:flex;gap:10px;margin-top:16px;}
+  .btn{flex:1;border:none;border-radius:14px;padding:15px;font-size:16px;font-weight:700;cursor:pointer;transition:transform .12s ease;}
   .btn.no{background:var(--bad-soft);color:var(--bad);}
   .btn.yes{background:var(--good-soft);color:var(--good);}
   .btn.prev{flex:0 0 auto;padding:15px 16px;background:var(--card);border:1px solid var(--line);color:var(--sub);font-weight:600;}
-  .btn:active{transform:scale(.97);}
+  .btn:active{transform:scale(.96);}
   .kbd{font-size:11px;opacity:.6;font-weight:500;margin-left:4px;}
 
   .opt{display:flex;align-items:center;gap:8px;justify-content:center;margin-top:16px;font-size:13px;color:var(--sub);}
@@ -103,26 +134,31 @@
   .done .emoji{font-size:52px;}
   .done h2{font-size:20px;margin:14px 0 6px;}
   .done p{color:var(--sub);font-size:14px;margin:0 0 18px;}
-  .done .btn{flex:none;width:100%;background:var(--accent);color:#fff;}
+  .done .btn{flex:none;width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;}
 
-  .reset{text-align:center;margin-top:30px;}
+  .reset{text-align:center;margin-top:32px;}
   .reset button{background:none;border:none;color:var(--sub);font-size:12px;text-decoration:underline;cursor:pointer;}
 </style>
 </head>
 <body>
 <div class="wrap" id="home">
   <header>
-    <div class="brand">
-      <h1>背背背😡</h1>
-      <span class="sub" id="subtitle">英语生词聚类卡</span>
+    <div class="brand-row">
+      <div class="brand">
+        <div class="brand-title"><span class="logo">😡</span><h1>背背背</h1></div>
+        <span class="sub" id="subtitle">英语生词聚类卡</span>
+      </div>
+      <div class="seg" id="mode-seg">
+        <button class="seg-btn on" data-mode="card">背卡</button>
+        <button class="seg-btn" data-mode="list">词表</button>
+      </div>
     </div>
     <div class="stats" id="stats"></div>
+    <div class="pbar"><i id="pbar"></i></div>
+    <div class="tabs" id="tabs"></div>
+    <div class="search"><input id="q" type="text" placeholder="搜索单词、短语或词义…"></div>
   </header>
-
-  <div class="tabs" id="tabs"></div>
-  <div class="search"><input id="q" type="text" placeholder="搜索单词、短语或词义，快速定位到某一组…"></div>
   <div id="list"></div>
-
   <div class="reset"><button id="reset">清除全部进度（重新开始）</button></div>
 </div>
 
@@ -135,7 +171,10 @@
   <div class="s-body">
     <div class="note" id="s-note"></div>
     <div class="bar"><i id="s-bar"></i></div>
-    <div class="card" id="card"></div>
+    <div class="card" id="card">
+      <div class="face front"></div>
+      <div class="face back"></div>
+    </div>
     <div class="actions">
       <button class="btn prev" id="btn-prev">上一词<span class="kbd">↑</span></button>
       <button class="btn no" id="btn-no">不认识 ✗<span class="kbd">←</span></button>
@@ -170,18 +209,37 @@ function stats(){
   return {k,w,n:TOTAL-k-w};
 }
 
+function esc(s){ return (s||'').replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+
+function speak(txt){
+  try{
+    const synth = (typeof window!=='undefined') && window.speechSynthesis;
+    if(!synth) return;
+    synth.cancel();
+    const u = new SpeechSynthesisUtterance(txt);
+    u.lang = 'en-US'; u.rate = 0.95;
+    const voices = synth.getVoices() || [];
+    const v = voices.find(x=>/^en/i.test(x.lang) && /us/i.test(x.lang)) || voices.find(x=>/^en/i.test(x.lang));
+    if(v) u.voice = v;
+    synth.speak(u);
+  }catch(e){}
+}
+
 /* ---------- 首页 ---------- */
-let curSec='all', q='';
+let curSec='all', q='', mode='card'; // mode: card | list
+
 function renderTabs(){
   const t=document.getElementById('tabs'); t.innerHTML='';
-  const add=(label,val,cls)=>'';
-  const mk=(label,val,cls,extra)=>{ const b=document.createElement('button'); b.className='chip'+(cls||''); b.textContent=label; if(curSec===val)b.classList.add('on'); b.onclick=()=>{curSec=val;renderTabs();renderList();}; t.appendChild(b); };
+  const mk=(label,val,cls)=>{ const b=document.createElement('button'); b.className='chip'+(cls||''); b.textContent=label; if(curSec===val)b.classList.add('on'); b.onclick=()=>{curSec=val;renderTabs();renderList();}; t.appendChild(b); };
   mk('全部','all');
   SECT.forEach(s=>mk(s[1],s[0]));
   const wc = P.w.size;
   mk('不会的词 '+wc,'weak','weak');
 }
-function renderList(){
+
+function renderList(){ if(mode==='list') renderWordList(); else renderClusters(); }
+
+function renderClusters(){
   const el=document.getElementById('list'); el.innerHTML='';
   const qv=q.trim().toLowerCase();
   let list = DATA;
@@ -211,6 +269,54 @@ function renderList(){
     }
   }
 }
+
+function renderWordList(){
+  const el=document.getElementById('list'); el.innerHTML='';
+  const qv=q.trim().toLowerCase();
+  const weakOnly = (curSec==='weak');
+  const secs = [];
+  for(const [sk, slabel] of SECT){
+    if(curSec!=='all' && curSec!=='weak' && curSec!==sk) continue;
+    const clusters = [];
+    let wc = 0;
+    for(const c of DATA){
+      if(c.s!==sk) continue;
+      let words = c.w;
+      if(weakOnly) words = words.filter(x=>P.w.has(x.w));
+      if(qv) words = words.filter(x=>x.w.toLowerCase().includes(qv) || x.m.toLowerCase().includes(qv));
+      if(!words.length) continue;
+      clusters.push({title:c.t, words});
+      wc += words.length;
+    }
+    if(clusters.length) secs.push({sk, slabel, clusters, wc});
+  }
+  if(!secs.length){ el.innerHTML='<div class="empty">没有找到相关内容</div>'; return; }
+
+  const accordion = (curSec==='all') && !qv;
+  for(const sec of secs){
+    if(accordion){
+      const open = openSec.has(sec.sk);
+      const h=document.createElement('button'); h.className='sec-head';
+      h.innerHTML=`<span class="sh-label">${sec.slabel}</span><span class="sh-count">${sec.wc} 词</span><span class="sh-chev">${open?'▾':'▸'}</span>`;
+      h.onclick=()=>{ open? openSec.delete(sec.sk) : openSec.add(sec.sk); saveOpen(); renderList(); };
+      el.appendChild(h);
+      if(!open) continue;
+    } else {
+      const h=document.createElement('div'); h.className='sec-title'; h.textContent=sec.slabel; el.appendChild(h);
+    }
+    for(const cl of sec.clusters){
+      const g=document.createElement('div'); g.className='wgroup';
+      g.innerHTML=`<div class="wg-title">${esc(cl.title)}</div>` +
+        cl.words.map(x=>`<div class="wrow" data-w="${esc(x.w)}"><span class="wdot ${statusOf(x.w)}"></span><span class="ww">${esc(x.w)}</span><button class="wspk">🔊</button><span class="wm">${esc(x.m)}</span></div>`).join('');
+      g.querySelectorAll('.wspk').forEach(b=>{
+        const w=b.closest('.wrow').getAttribute('data-w');
+        b.onclick=e=>{ e.stopPropagation(); speak(w); };
+      });
+      el.appendChild(g);
+    }
+  }
+}
+
 function clusterEl(c){
   let k=0,w=0;
   c.w.forEach(x=>{ const s=statusOf(x.w); if(s==='k')k++; else if(s==='w')w++; });
@@ -221,31 +327,17 @@ function clusterEl(c){
   b.onclick=()=>openCluster(c.k);
   return b;
 }
-function esc(s){ return (s||'').replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
-
-function speak(txt){
-  try{
-    const synth = (typeof window!=='undefined') && window.speechSynthesis;
-    if(!synth) return;
-    synth.cancel();
-    const u = new SpeechSynthesisUtterance(txt);
-    u.lang = 'en-US'; u.rate = 0.95;
-    const voices = synth.getVoices() || [];
-    const v = voices.find(x=>/^en/i.test(x.lang) && /us/i.test(x.lang)) || voices.find(x=>/^en/i.test(x.lang));
-    if(v) u.voice = v;
-    synth.speak(u);
-  }catch(e){}
-}
 
 function renderStats(){
   const s=stats();
   document.getElementById('stats').innerHTML =
     `<span class="stat good">已会 <b>${s.k}</b></span><span class="stat bad">不会 <b>${s.w}</b></span><span class="stat new">未学 <b>${s.n}</b></span>`;
   document.getElementById('subtitle').textContent = `英语生词聚类卡 · ${TOTAL} 词 · ${DATA.length} 组`;
+  document.getElementById('pbar').style.width = (TOTAL? s.k/TOTAL*100 : 0)+'%';
 }
 
 /* ---------- 学习视图 ---------- */
-let study=null; // {title,note,key,deck:[{w,m}],di,flipped,weakOnly}
+let study=null; // {title,note,key,deck:[{w,m}],di,flipped,weakOnly,undo}
 function openCluster(key){
   const c=DATA.find(x=>x.k===key); if(!c)return;
   study={title:c.t,note:c.n,key:c.k,deck:c.w.map(x=>({w:x.w,m:x.m})),di:0,flipped:false,weakOnly:false,undo:[]};
@@ -265,7 +357,7 @@ function showStudy(){
   document.getElementById('s-note').innerHTML='<b>记法 · </b>'+esc(study.note);
   document.getElementById('s-done').style.display='none';
   document.querySelector('.actions').style.display='flex';
-  document.getElementById('card').style.display='flex';
+  document.getElementById('card').style.display='grid';
   renderCard();
 }
 function rebuildDeck(){
@@ -279,7 +371,7 @@ function rebuildDeck(){
   if(!study.deck.length){ renderEmpty(); return; }
   document.getElementById('s-done').style.display='none';
   document.querySelector('.actions').style.display='flex';
-  document.getElementById('card').style.display='flex';
+  document.getElementById('card').style.display='grid';
   renderCard();
 }
 function renderCard(){
@@ -289,11 +381,9 @@ function renderCard(){
   const done=study.di/total*100;
   document.getElementById('s-bar').style.width=done+'%';
   document.getElementById('s-prog').textContent=(study.di+1)+' / '+total;
-  if(study.flipped){
-    card.innerHTML=`<div class="tag">${esc(study.title)}</div><div class="w-small">${esc(cur.w)} <button class="speak sm">🔊</button></div><div class="m">${esc(cur.m)}</div>`;
-  } else {
-    card.innerHTML=`<div class="w">${esc(cur.w)}</div><div class="hint">轻点卡片看释义</div><button class="speak">🔊 发音</button>`;
-  }
+  card.querySelector('.face.front').innerHTML=`<div class="w">${esc(cur.w)}</div><div class="hint">轻点卡片看释义</div><button class="speak">🔊 发音</button>`;
+  card.querySelector('.face.back').innerHTML=`<div class="tag">${esc(study.title)}</div><div class="w-small">${esc(cur.w)} <button class="speak sm">🔊</button></div><div class="m">${esc(cur.m)}</div>`;
+  card.classList.toggle('flipped', study.flipped);
   card.querySelectorAll('.speak').forEach(b=>{ b.onclick=e=>{ e.stopPropagation(); speak(cur.w); }; });
   card.onclick=()=>{ study.flipped=!study.flipped; if(study.flipped) speak(cur.w); renderCard(); };
 }
@@ -318,7 +408,7 @@ function prev(){
   study.di--; study.flipped=false;
   document.getElementById('s-done').style.display='none';
   document.querySelector('.actions').style.display='flex';
-  document.getElementById('card').style.display='flex';
+  document.getElementById('card').style.display='grid';
   renderCard();
 }
 function renderDone(){
@@ -357,6 +447,8 @@ document.getElementById('btn-prev').onclick=prev;
 document.getElementById('weak-only').onchange=e=>{ study.weakOnly=e.target.checked; rebuildDeck(); };
 document.getElementById('q').oninput=e=>{ q=e.target.value; renderList(); };
 document.getElementById('reset').onclick=()=>{ if(confirm('确定清除全部进度？')){ P={k:new Set(),w:new Set()}; save(); renderStats(); renderTabs(); renderList(); } };
+document.querySelectorAll('#mode-seg .seg-btn').forEach(b=> b.onclick=()=>setMode(b.dataset.mode));
+function setMode(m){ mode=m; document.querySelectorAll('#mode-seg .seg-btn').forEach(b=> b.classList.toggle('on', b.dataset.mode===m)); renderList(); }
 document.addEventListener('keydown',e=>{
   if(!document.getElementById('study').classList.contains('show')) return;
   if(e.key===' '||e.key==='ArrowDown'){ e.preventDefault(); if(study){study.flipped=!study.flipped; if(study.flipped) speak(study.deck[study.di].w); renderCard();} }
