@@ -80,6 +80,9 @@
   .card .w-small{font-size:15px;font-weight:700;color:var(--sub);margin-bottom:14px;word-break:break-word;}
   .card .m{font-size:19px;font-weight:600;color:var(--ink);line-height:1.6;word-break:break-word;text-align:left;}
   .card .tag{font-size:12px;color:var(--sub);margin-bottom:8px;}
+  .card .speak{margin-top:20px;border:1px solid var(--line);background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:8px 18px;font-size:14px;font-weight:700;cursor:pointer;}
+  .card .speak:active{transform:scale(.96);}
+  .card .speak.sm{margin:0 0 0 8px;padding:3px 10px;font-size:13px;}
 
   .actions{display:flex;gap:12px;margin-top:16px;}
   .btn{flex:1;border:none;border-radius:14px;padding:15px;font-size:16px;font-weight:700;cursor:pointer;transition:.12s;}
@@ -202,6 +205,20 @@ function clusterEl(c){
 }
 function esc(s){ return (s||'').replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
 
+function speak(txt){
+  try{
+    const synth = (typeof window!=='undefined') && window.speechSynthesis;
+    if(!synth) return;
+    synth.cancel();
+    const u = new SpeechSynthesisUtterance(txt);
+    u.lang = 'en-US'; u.rate = 0.95;
+    const voices = synth.getVoices() || [];
+    const v = voices.find(x=>/^en/i.test(x.lang) && /us/i.test(x.lang)) || voices.find(x=>/^en/i.test(x.lang));
+    if(v) u.voice = v;
+    synth.speak(u);
+  }catch(e){}
+}
+
 function renderStats(){
   const s=stats();
   document.getElementById('stats').innerHTML =
@@ -255,11 +272,12 @@ function renderCard(){
   document.getElementById('s-bar').style.width=done+'%';
   document.getElementById('s-prog').textContent=(study.di+1)+' / '+total;
   if(study.flipped){
-    card.innerHTML=`<div class="tag">${esc(study.title)}</div><div class="w-small">${esc(cur.w)}</div><div class="m">${esc(cur.m)}</div>`;
+    card.innerHTML=`<div class="tag">${esc(study.title)}</div><div class="w-small">${esc(cur.w)} <button class="speak sm">🔊</button></div><div class="m">${esc(cur.m)}</div>`;
   } else {
-    card.innerHTML=`<div class="w">${esc(cur.w)}</div><div class="hint">轻点卡片看释义</div>`;
+    card.innerHTML=`<div class="w">${esc(cur.w)}</div><div class="hint">轻点卡片看释义</div><button class="speak">🔊 发音</button>`;
   }
-  card.onclick=()=>{ study.flipped=!study.flipped; renderCard(); };
+  card.querySelectorAll('.speak').forEach(b=>{ b.onclick=e=>{ e.stopPropagation(); speak(cur.w); }; });
+  card.onclick=()=>{ study.flipped=!study.flipped; if(study.flipped) speak(cur.w); renderCard(); };
 }
 function mark(know){
   if(!study || !study.deck.length) return;
@@ -306,7 +324,7 @@ document.getElementById('q').oninput=e=>{ q=e.target.value; renderList(); };
 document.getElementById('reset').onclick=()=>{ if(confirm('确定清除全部进度？')){ P={k:new Set(),w:new Set()}; save(); renderStats(); renderTabs(); renderList(); } };
 document.addEventListener('keydown',e=>{
   if(!document.getElementById('study').classList.contains('show')) return;
-  if(e.key===' '||e.key==='ArrowDown'){ e.preventDefault(); if(study){study.flipped=!study.flipped; renderCard();} }
+  if(e.key===' '||e.key==='ArrowDown'){ e.preventDefault(); if(study){study.flipped=!study.flipped; if(study.flipped) speak(study.deck[study.di].w); renderCard();} }
   else if(e.key==='ArrowLeft'||e.key==='1'){ mark(false); }
   else if(e.key==='ArrowRight'||e.key==='2'){ mark(true); }
 });
